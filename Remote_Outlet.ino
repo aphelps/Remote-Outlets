@@ -1,3 +1,7 @@
+/*
+ * 
+ */
+
 #define NUM_BUTTONS 3
 int BUTTONS[NUM_BUTTONS] = {2, 3, 4};
 
@@ -20,6 +24,8 @@ unsigned long lastSent = 0;
 #endif
 
 void setup() {
+  debounce_init();
+
   for (int i; i < NUM_BUTTONS; i++) {
     pinMode(BUTTONS[i], INPUT);  
   }

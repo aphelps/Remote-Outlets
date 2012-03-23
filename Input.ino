@@ -3,19 +3,18 @@ int lastState[NUM_BUTTONS];
 long debounceTime[NUM_BUTTONS];
 
 void debounce_init() {
-  for (int i = 0; i < NUM_BUTTONS) {
+  for (int i = 0; i < NUM_BUTTONS; i++) {
     buttonState[i] = LOW;
     lastState[i] = LOW;
-    debounceTime = 0;
+    debounceTime[i] = 0;
   }
 }
-  
   
 int debounced_read(int button, int debounce_delay) {
   int currentValue = digitalRead(BUTTONS[button]);
   
   if (currentValue != lastState[button]) {
-    debounceTime = millis();  
+    debounceTime[button] = millis();  
   }
   lastState[button] = currentValue;
   
