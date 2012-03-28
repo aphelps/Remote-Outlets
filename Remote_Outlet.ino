@@ -5,7 +5,7 @@
 #define NUM_BUTTONS 3
 int BUTTONS[NUM_BUTTONS] = {2, 3, 4};
 
-int LED = 10;
+int LED = 11;
 int debugLED = 12;
 int analogValue = 0;
 int remoteIndicator = false;
@@ -15,12 +15,14 @@ unsigned long lastSent = 0;
 
 #define DEBUG
 #ifdef DEBUG
-  #define DEBUG_VERBOSE 1
+  #define DEBUG_VERBOSE 2
   #define DEBUG_PRINT(v, x) if (v <= DEBUG_VERBOSE) Serial.print(x)
   #define DEBUG_WRITE(v, x) if (v <= DEBUG_VERBOSE)  Serial.print(x, HEX);
+  #define DEBUG_COMMAND(x) x;
 #else
   #define DEBUG_PRINT(v, x)
   #define DEBUG_WRITE(v, x)
+  #define DEBUG_COMMAND(x)
 #endif
 
 void setup() {
