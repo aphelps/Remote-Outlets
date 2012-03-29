@@ -1,9 +1,15 @@
 /*
- * 
+ * Remote Control code
  */
 
+#include "Debug.h"
+
 #define NUM_BUTTONS 3
-int BUTTONS[NUM_BUTTONS] = {2, 3, 4};
+const int BUTTONS[NUM_BUTTONS] = {
+  2, // momentary switch on board
+  3, // blue arcade switch
+  4  // red arcade switch
+};
 
 int LED = 11;
 int debugLED = 12;
@@ -13,31 +19,20 @@ int remoteIndicator = false;
 int lastRemoteIndicator = false;
 unsigned long lastSent = 0;
 
-#define DEBUG
-#ifdef DEBUG
-  #define DEBUG_VERBOSE 2
-  #define DEBUG_PRINT(v, x) if (v <= DEBUG_VERBOSE) Serial.print(x)
-  #define DEBUG_WRITE(v, x) if (v <= DEBUG_VERBOSE)  Serial.print(x, HEX);
-  #define DEBUG_COMMAND(x) x;
-#else
-  #define DEBUG_PRINT(v, x)
-  #define DEBUG_WRITE(v, x)
-  #define DEBUG_COMMAND(x)
-#endif
 
 void setup() {
-  debounce_init();
+  buttons_init(BUTTONS, NUM_BUTTONS);
 
-  for (int i; i < NUM_BUTTONS; i++) {
-    pinMode(BUTTONS[i], INPUT);  
-  }
+  //buttons_set_action(1, action_set_lcd);
+  //buttons_set_action(2, action_light_led);
 
   pinMode(LED, OUTPUT);
-  pinMode(debugLED, OUTPUT); 
+  pinMode(debugLED, OUTPUT);
+
+  LCD_setup();
+  
   Serial.begin(9600);
 }
-
-
 
 void loop() {
   if (Serial.available() >= 23) {
@@ -75,8 +70,10 @@ void loop() {
   
   if (checkButtons()) {
     remoteIndicator = true;
+    DEBUG_COMMAND(digitalWrite(debugLED, HIGH));
   } else {
     remoteIndicator = false;
+    DEBUG_COMMAND(digitalWrite(debugLED, LOW));
   }
   
   if (remoteIndicator != lastRemoteIndicator) {
@@ -87,6 +84,8 @@ void loop() {
     if (remoteIndicator == true)  setRemoteState(0x5);
     lastRemoteIndicator = remoteIndicator;
   }
+
+  LCD_loop();
 }
 
 uint8_t command[] = { 0x7E, 0x00, 0x10, 0x17, 0x00,
