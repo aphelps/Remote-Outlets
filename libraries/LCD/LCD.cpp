@@ -1,11 +1,17 @@
+/*
+ *  Library by Adam Phelps (amp@cs.stanford.edu)
+ */
+
+#include "Arduino.h"
+
 #include <LiquidCrystal.h>
 
 // initialize the library with the numbers of the interface pins
 LiquidCrystal lcd(5, 6, 7, 8, 9, 10);
 
-long lcd_update_time = 0;
+unsigned long lcd_update_time = 0;
 char lcd_enabled = 0;
-long lcd_disable_timeout = 10000;
+unsigned long lcd_disable_timeout = 10000;
 
 void LCD_setup() 
 {

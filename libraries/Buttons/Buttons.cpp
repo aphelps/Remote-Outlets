@@ -1,8 +1,11 @@
 /*
  * Code for on-off controls
  */
+#include <Arduino.h>
 
-typedef void (*button_action_t)(int button, int value);
+#include "Buttons.h"
+#include "Debug.h"
+
 
 #define MAX_BUTTONS 4
 int num_buttons = 0;
@@ -12,24 +15,7 @@ int buttons_prev_state[MAX_BUTTONS];
 long buttons_debounce_time[MAX_BUTTONS];
 button_action_t buttons_action[MAX_BUTTONS];
 
-void action_set_lcd(int button, int value) 
-{
-  String text = String(String("button ") + String(button) + String(":") + String(value));
-  LCD_set(button - 1, 0, text);
-}
-
-void action_light_led(int button, int value) 
-{
-  digitalWrite(LED, value);
-}
-
-void buttons_set_action(int button, void (*action)(int button, int value)) 
-{
-  buttons_action[button] = action;
-}
-
-
-void buttons_init(const int buttons[], const int nbuttons) 
+void buttons_init(const int buttons[], const int nbuttons)
 {
   num_buttons = nbuttons;
   for (int i = 0; i < num_buttons; i++) {
@@ -44,13 +30,17 @@ void buttons_init(const int buttons[], const int nbuttons)
     buttons_debounce_time[i] = 0;
 
     /* Initialize button action */
-    //buttons_action[i] = action_set_lcd;
-    buttons_set_action(i, action_set_lcd);
+    buttons_action[i] = NULL;
   }
 }
 
+void buttons_set_action(int button, void (*action)(int button, int value)) 
+{
+  buttons_action[button] = action;
+}
+
   
-int debounced_read(int button, int debounce_delay) {
+int debounced_read(int button, unsigned int debounce_delay) {
   int currentValue = digitalRead(buttons_pin[button]);
   
   if (currentValue != buttons_prev_state[button]) {
@@ -80,8 +70,8 @@ int debounced_read(int button, int debounce_delay) {
 }
 
 
-boolean checkButtons() {
-  for (int i = 0; i < NUM_BUTTONS; i++) {
+int checkButtons() {
+  for (int i = 0; i < num_buttons; i++) {
     if (debounced_read(i, 50) == HIGH)
       return true;
   }

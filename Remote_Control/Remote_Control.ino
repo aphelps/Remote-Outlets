@@ -2,7 +2,11 @@
  * Remote Control code
  */
 
+#include <LiquidCrystal.h>
+
+#include "Buttons.h"
 #include "Debug.h"
+#include "LCD.h"
 
 #define NUM_BUTTONS 3
 const int BUTTONS[NUM_BUTTONS] = {
@@ -23,8 +27,8 @@ unsigned long lastSent = 0;
 void setup() {
   buttons_init(BUTTONS, NUM_BUTTONS);
 
-  //buttons_set_action(1, action_set_lcd);
-  //buttons_set_action(2, action_light_led);
+  buttons_set_action(1, action_set_lcd);
+  buttons_set_action(2, action_light_led);
 
   pinMode(LED, OUTPUT);
   pinMode(debugLED, OUTPUT);
