@@ -1,3 +1,9 @@
+/*
+ * Button class
+ *
+ * Written by Adam Phelps (amp@cs.stanford.edu)
+ */
+
 #ifndef BUTTONS_H
 #define BUTTONS_H
 
@@ -9,9 +15,27 @@ THIS IS A COMPILER ASSERT
 
 #define DEFAULT_DEBOUNCE_DELAY 50
 
-typedef void (*button_action_t)(int button, int value);
+typedef enum 
+{
+  PIN_TYPE_NONE,
+  PIN_TYPE_BUTTON
+} pin_type_t;
+  
 
-class Button
+class Pin 
+{
+  public:
+  Pin(byte _pin, pin_type_t _type);
+  Pin(byte _pin);
+
+  pin_type_t type;
+
+  protected:
+  byte pin;
+};
+
+typedef void (*button_action_t)(int button, int value);
+class Button : public Pin
 {
   public:
   Button(byte _pin, button_action_t _action);
@@ -21,7 +45,7 @@ class Button
   button_action_t action;
 
   private:
-  byte pin;
+//  byte pin;
   byte curr_state;
   byte prev_state;
 
@@ -30,6 +54,7 @@ class Button
 };
 
 
-boolean checkButtons(Button *buttons, byte num_buttons);
+boolean checkButtons(Pin *pins, byte num_pins);
+boolean checkButtons2(Button *pins, byte num_pins);
 
 #endif

@@ -1,7 +1,7 @@
 /*
  * Remote Control code
  *
- * Writte by Adam Phelps (amp@cs.stanford.edu)
+ * Written by Adam Phelps (amp@cs.stanford.edu)
  */
 
 #include <LiquidCrystal.h>
@@ -10,12 +10,13 @@
 #include "Debug.h"
 #include "LCD.h"
 
-#define NUM_BUTTONS 3
-Button BUTTONS[NUM_BUTTONS] = {
+#define NUM_PINS 3
+Button PINS[NUM_PINS] = {
   Button(2, NULL), // momentary switch on board
   Button(3, action_set_lcd), // blue arcade switch
-  Button(4, action_light_led)  // red arcade switch
+  Button(4, action_set_lcd)  // red arcade switch
 };
+
 
 int LED = 11;
 int debugLED = 12;
@@ -68,7 +69,7 @@ void loop() {
 #endif
 
   
-  if (checkButtons(BUTTONS, NUM_BUTTONS)) {
+  if (checkButtons2(PINS, NUM_PINS)) {
     remoteIndicator = true;
     DEBUG_COMMAND(digitalWrite(debugLED, HIGH));
   } else {
