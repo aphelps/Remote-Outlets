@@ -6,9 +6,23 @@
 #include "Buttons.h"
 #include "Debug.h"
 
-Button::Button(byte _pin, button_action_t _action) 
+Pin::Pin(byte _pin, pin_type_t _type)
 {
   pin = _pin;
+  type = _type;
+}
+
+Pin::Pin(byte _pin)
+{
+  Pin(_pin, PIN_TYPE_NONE);
+}
+
+
+
+
+Button::Button(byte _pin, button_action_t _action) 
+    : Pin(_pin, PIN_TYPE_BUTTON)
+{
   pinMode(pin, OUTPUT);
   action = _action;
 
@@ -59,10 +73,22 @@ Button::debouncedRead(void)
 }
 
 
+
 boolean
-checkButtons(Button *buttons, byte num_buttons) {
-  for (byte i = 0; i < num_buttons; i++) {
-    if (buttons[i].debouncedRead())
+checkButtons(Pin *pins, byte num_pins) {
+  for (byte i = 0; i < num_pins; i++) {
+    Pin *pin = &(pins[i]);
+    if (pin->type == PIN_TYPE_BUTTON)
+      if (((Button *)pin)->debouncedRead())
+        return true;
+  }
+  return false;
+}
+
+boolean
+checkButtons2(Button *pins, byte num_pins) {
+  for (byte i = 0; i < num_pins; i++) {
+    if (pins[i].debouncedRead())
       return true;
   }
   return false;
