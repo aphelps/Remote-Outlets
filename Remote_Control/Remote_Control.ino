@@ -10,21 +10,31 @@
 #include "Debug.h"
 #include "LCD.h"
 
-#define NUM_PINS 3
-Button PINS[NUM_PINS] = {
-  Button(2, NULL), // momentary switch on board
-  Button(3, action_set_lcd), // blue arcade switch
-  Button(4, action_set_lcd)  // red arcade switch
+Button button1(2, NULL);
+Button button2(3, action_set_lcd); // blue arcade switch
+Button button3(4, action_set_lcd);  // red arcade switch
+
+#define NUM_PINS 14
+Pin *pinArray[NUM_PINS] = {
+  NULL,     // 0: RX - to Xbee via switch
+  NULL,     // 1: TX - to Xbee
+  &button1,
+  &button2,
+  &button3,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
 };
 
 
 int LED = 11;
 int debugLED = 12;
-int analogValue = 0;
-int remoteIndicator = false;
-
-int lastRemoteIndicator = false;
-unsigned long lastSent = 0;
 
 void setup() {
   pinMode(LED, OUTPUT);
@@ -34,6 +44,12 @@ void setup() {
   
   Serial.begin(9600);
 }
+
+int analogValue = 0;
+int remoteIndicator = false;
+
+int lastRemoteIndicator = false;
+unsigned long lastSent = 0;
 
 void loop() {
   if (Serial.available() >= 23) {
@@ -69,7 +85,7 @@ void loop() {
 #endif
 
   
-  if (checkButtons2(PINS, NUM_PINS)) {
+  if (checkButtons(pinArray, NUM_PINS)) {
     remoteIndicator = true;
     DEBUG_COMMAND(digitalWrite(debugLED, HIGH));
   } else {
