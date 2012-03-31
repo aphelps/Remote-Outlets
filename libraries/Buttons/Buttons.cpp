@@ -75,9 +75,9 @@ Button::debouncedRead(void)
 
 
 boolean
-checkButtons(Pin *pins, byte num_pins) {
+checkButtons(Pin **pins, byte num_pins) {
   for (byte i = 0; i < num_pins; i++) {
-    Pin *pin = &(pins[i]);
+    Pin *pin = pins[i];
     if (pin->type == PIN_TYPE_BUTTON)
       if (((Button *)pin)->debouncedRead())
         return true;

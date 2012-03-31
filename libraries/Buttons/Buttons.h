@@ -54,7 +54,7 @@ class Button : public Pin
 };
 
 
-boolean checkButtons(Pin *pins, byte num_pins);
+boolean checkButtons(Pin **pins, byte num_pins);
 boolean checkButtons2(Button *pins, byte num_pins);
 
 #endif
