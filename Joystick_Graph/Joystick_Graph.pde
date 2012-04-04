@@ -80,7 +80,7 @@ void serialEvent (Serial myPort) {
  
     // draw the line:
     int radius = 15;
-    if (val3 < 50) {
+    if (val3 < 5) {
       fill (255, 0, 0);
       radius = 20;
     }
