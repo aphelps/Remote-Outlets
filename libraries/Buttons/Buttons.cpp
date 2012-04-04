@@ -86,24 +86,15 @@ Button::debouncedRead(void)
   return (curr_state == HIGH);
 }
 
-
-
+/* Check the state of every sensor */
 boolean
 checkButtons(Pin **pins, byte num_pins) {
+  boolean retval = false;
   for (byte i = 0; i < num_pins; i++) {
     Pin *pin = pins[i];
     if (pin->type == PIN_TYPE_BUTTON)
       if (((Button *)pin)->debouncedRead())
-        return true;
+        retval = true;
   }
-  return false;
-}
-
-boolean
-checkButtons2(Button *pins, byte num_pins) {
-  for (byte i = 0; i < num_pins; i++) {
-    if (pins[i].debouncedRead())
-      return true;
-  }
-  return false;
+  return retval;
 }

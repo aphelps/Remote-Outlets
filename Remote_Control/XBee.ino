@@ -27,3 +27,32 @@ void setRemoteState(int pin, uint8_t value) {
 
   delay(1); // Safety pause to avoid overloading serial port if not implemented properly
 }
+
+int analogValue = 0;
+
+/* Read data from the Xbee over the serial port */
+void serialEvent() 
+{
+  if (Serial.available() >= 23) {
+    if (Serial.read() == 0x7E) {
+#ifdef DEBUG      
+      digitalWrite(debugLED, HIGH);
+      debugLEDTime = millis() + 500;
+#endif
+
+      for (int i = 0; i < 20; i++) {
+        byte discard = Serial.read(); 
+      } 
+      int analogHigh = Serial.read();
+      int analogLow = Serial.read();
+      analogValue = analogLow + (analogHigh * 256);
+      
+      DEBUG_PRINT(2, "Read value ");
+      DEBUG_PRINT(2, analogValue);
+      DEBUG_PRINT(2, "\n");
+
+      String text = String(String("Xbee value: ") + String(analogValue));
+      LCD_set(0, 0, text);
+    }
+  }
+}
