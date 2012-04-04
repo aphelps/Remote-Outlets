@@ -17,11 +17,8 @@ Pin::Pin(byte _pin)
   Pin(_pin, PIN_TYPE_NONE);
 }
 
-
-
-
-Button::Button(byte _pin, button_action_t _action) 
-    : Pin(_pin, PIN_TYPE_BUTTON)
+void
+Button::init(byte _pin, button_action_t _action)
 {
   pinMode(pin, OUTPUT);
   action = _action;
@@ -32,6 +29,23 @@ Button::Button(byte _pin, button_action_t _action)
   debounce_time = 0;
   debounce_delay = DEFAULT_DEBOUNCE_DELAY;
 }
+
+
+Button::Button(byte _pin, button_action_t _action) 
+    : Pin(_pin, PIN_TYPE_BUTTON)
+{
+  init(_pin, _action);
+  action_arg = NULL;
+
+}
+
+Button::Button(byte _pin, button_action_t _action, void *_action_arg)
+    : Pin(_pin, PIN_TYPE_BUTTON)
+{
+  init(_pin, _action);
+  action_arg = _action_arg;
+}
+
 
 boolean
 Button::read(void) 
@@ -65,7 +79,7 @@ Button::debouncedRead(void)
       DEBUG_PRINT(2, curr_state);
       DEBUG_PRINT(2, "\n");
 
-      if (action) action(pin, currentValue);
+      if (action) action(pin, currentValue, action_arg);
     }
   }
   

@@ -9,10 +9,6 @@
 
 #include <Arduino.h>
 
-#if (HIGH > 256) || (LOW > 256)
-THIS IS A COMPILER ASSERT
-#endif
-
 #define DEFAULT_DEBOUNCE_DELAY 50
 
 typedef enum 
@@ -34,18 +30,22 @@ class Pin
   byte pin;
 };
 
-typedef void (*button_action_t)(int button, int value);
+typedef void (*button_action_t)(int button, int value, void *arg);
+
 class Button : public Pin
 {
   public:
   Button(byte _pin, button_action_t _action);
+  Button(byte _pin, button_action_t _action, void *_action_arg);
   boolean read(void);
   boolean debouncedRead(void);
 
   button_action_t action;
+  void *action_arg;
 
   private:
-//  byte pin;
+  void init(byte _pin, button_action_t _action);
+
   byte curr_state;
   byte prev_state;
 
