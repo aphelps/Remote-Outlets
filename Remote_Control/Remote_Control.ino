@@ -9,16 +9,35 @@
 #include "Buttons.h"
 #include "Debug.h"
 #include "LCD.h"
+#include "Menu.h"
 
 int LED = 11;
 int debugLED = 12;
 
+MenuItem menu1("Sample Action", "Counter", NULL, NULL);
+MenuItem menu2("Toggle Xbee 1", "Toggle", menu_toggle_xbee, (void *)'1');
+MenuItem menu3("Toggle Xbee 2", "Toggle", menu_toggle_xbee, (void *)'2');
+MenuItem menu4("Menu Line 4", "Action 4", NULL, NULL);
+
+#define NUM_MENU_ITEMS 4
+MenuItem *menuArray[NUM_MENU_ITEMS] = {
+  &menu1,
+  &menu2,
+  &menu3,
+  &menu4
+};
+Menu menu(NUM_MENU_ITEMS, menuArray, &lcd);
+
 
 Button button1(2, NULL);
-Button button2(3, action_set_xbee, (void *)'1'); // blue arcade switch
-Button button3(4, action_set_xbee, (void *)'2'); // red arcade switch
-//Button button2(3, action_light_led, (void *)LED); // blue arcade switch
-//Button button3(4, action_light_led, (void *)LED);  // red arcade switch
+//Button button2(3, button_set_xbee, (void *)'1'); // blue arcade switch
+//Button button3(4, button_set_xbee, (void *)'2'); // red arcade switch
+Button button2(3, button_light_led, (void *)LED); // blue arcade switch
+Button button3(4, button_light_led, (void *)LED);  // red arcade switch
+//Button button2(3, button_set_lcd, NULL); // blue arcade switch
+//Button button3(4, button_set_lcd, NULL);  // red arcade switch
+//Button button2(3, button_menu_next, &menu); // blue arcade switch
+//Button button3(4, button_menu_select, &menu);  // red arcade switch
 
 #define NUM_PINS 14
 Pin *pinArray[NUM_PINS] = {
@@ -37,16 +56,18 @@ Pin *pinArray[NUM_PINS] = {
   NULL,     // 12: LED
   NULL,     // 13: Empty
 };
-
-
+#endif
 
 void setup() {
+  Serial.begin(9600);
+
   pinMode(LED, OUTPUT);
   pinMode(debugLED, OUTPUT);
 
-  LCD_setup();
   
-  Serial.begin(9600);
+//  LCD_setup();
+//  LCD_set(0, 0, "This is a test", true);
+//  menu.display();
 }
 
 #ifdef DEBUG
@@ -60,7 +81,6 @@ void loop() {
     digitalWrite(debugLED, LOW);
   }
 #endif
-  
   
   if (checkButtons(pinArray, NUM_PINS)) {
     DEBUG_COMMAND(digitalWrite(debugLED, HIGH));

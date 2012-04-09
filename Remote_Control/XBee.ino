@@ -1,5 +1,7 @@
 #include <XBee.h>
 
+//#define XBEE_ON_LCD
+
 uint8_t command[] = { 0x7E, 0x00, 0x10, 0x17, 0x00,
                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 
                    0xFF, 0xFE, 
@@ -59,9 +61,12 @@ void serialEvent()
       for (int i = 13; i < 20; i++) {
         discard = Serial.read(); 
       }
+
+#ifdef XBEE_ON_LCD      
       String str = String(String("S") + String(source_low, HEX) +
                           String(" N") + String(network_addr, HEX));
       LCD_set(0, 0, str, true);
+#endif
 
       word analogValue = readWord();
       
@@ -69,8 +74,10 @@ void serialEvent()
       DEBUG_PRINT(2, analogValue);
       DEBUG_PRINT(2, "\n");
 
+#ifdef XBEE_ON_LCD
       String text = String(String("Xbee value:") + String(analogValue));
       LCD_set(1, 0, text, true);
+#endif
     }
   }
 }
