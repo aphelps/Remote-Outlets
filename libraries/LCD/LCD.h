@@ -4,7 +4,7 @@
 #include "Arduino.h"
 
 void LCD_setup();
-void LCD_set(int row, int col, String text);
+void LCD_set(int row, int col, String text, boolean pad);
 void LCD_loop();
 
 #endif

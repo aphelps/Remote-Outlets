@@ -28,7 +28,9 @@ void setRemoteState(int pin, uint8_t value) {
   delay(1); // Safety pause to avoid overloading serial port if not implemented properly
 }
 
-int analogValue = 0;
+#define readByte() (byte)Serial.read()
+#define readWord() (((word)Serial.read() << 8) |  (word)Serial.read())
+#define readLong()  (((long)Serial.read() << 24) | ((long)Serial.read() << 16) | ((long)Serial.read() << 8) | (long)Serial.read())
 
 /* Read data from the Xbee over the serial port */
 void serialEvent() 
@@ -40,19 +42,35 @@ void serialEvent()
       debugLEDTime = millis() + 500;
 #endif
 
-      for (int i = 0; i < 20; i++) {
-        byte discard = Serial.read(); 
-      } 
-      int analogHigh = Serial.read();
-      int analogLow = Serial.read();
-      analogValue = analogLow + (analogHigh * 256);
+      /* Length: 2B */
+      word length = readWord();
+
+      /* Frame type: 1B */
+      readByte();
+
+      /* Source address: 8B */
+      long source_high = readLong();
+      long source_low = readLong();
+
+      /* Network address: 2B */
+      word network_addr = readWord();
+
+      byte discard;
+      for (int i = 13; i < 20; i++) {
+        discard = Serial.read(); 
+      }
+      String str = String(String("S") + String(source_low, HEX) +
+                          String(" N") + String(network_addr, HEX));
+      LCD_set(0, 0, str, true);
+
+      word analogValue = readWord();
       
       DEBUG_PRINT(2, "Read value ");
       DEBUG_PRINT(2, analogValue);
       DEBUG_PRINT(2, "\n");
 
-      String text = String(String("Xbee value: ") + String(analogValue));
-      LCD_set(0, 0, text);
+      String text = String(String("Xbee value:") + String(analogValue));
+      LCD_set(1, 0, text, true);
     }
   }
 }

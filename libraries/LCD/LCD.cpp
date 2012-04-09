@@ -22,16 +22,23 @@ void LCD_setup()
   lcd.noDisplay();
 }
 
-void LCD_set(int row, int col, String text) 
+void LCD_set(int row, int col, String text, boolean pad) 
 {
   if (!lcd_enabled) {
     lcd_enabled = 1;
     lcd.display();
   }
-  lcd_update_time = millis();
+
+  /* Pad the string to the full 16 characters */
+  if (pad) {
+    for (int i = col + text.length(); i < 16; i++) {
+      text += " ";
+    }
+  }
 
   lcd.setCursor(col, row);
   lcd.print(text);
+  lcd_update_time = millis();
 }
 
 void LCD_loop() 

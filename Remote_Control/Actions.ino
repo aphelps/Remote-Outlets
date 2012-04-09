@@ -1,7 +1,7 @@
 void action_set_lcd(int button, int value, void *arg)
 {
   String text = String(String("button ") + String(button) + String(":") + String(value));
-  LCD_set(button - 1, 0, text);
+  LCD_set(button - 1, 0, text, true);
 }
 
 void action_light_led(int button, int value, void *arg)
