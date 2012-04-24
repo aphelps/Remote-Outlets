@@ -1,0 +1,6 @@
+#!/bin/bash
+
+find . -name "*.h" > cscope.files
+find . -name "*.cpp" >> cscope.files
+find . -name "*.ino" >> cscope.files
+find . -name "*.pde" >> cscope.files
