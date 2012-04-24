@@ -1,0 +1,3 @@
+4/16 - Switch "Button" to "Sensor"
+
+4/24 - Have a better separation of buttons from joystick (or analog sensors in general)

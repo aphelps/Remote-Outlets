@@ -14,49 +14,63 @@
 int LED = 11;
 int debugLED = 12;
 
-MenuItem menu1("Sample Action", "Counter", NULL, NULL);
-MenuItem menu2("Toggle Xbee 1", "Toggle", menu_toggle_xbee, (void *)'1');
-MenuItem menu3("Toggle Xbee 2", "Toggle", menu_toggle_xbee, (void *)'2');
-MenuItem menu4("Menu Line 4", "Action 4", NULL, NULL);
+MenuItem menu_xbee1("Toggle Xbee 1", "Toggle XBee1",
+                    menu_toggle_xbee, (void *)'1');
+MenuItem menu_xbee2("Toggle Xbee 2", "Toggle XBee2",
+                    menu_toggle_xbee, (void *)'2');
+MenuItem menu_example("Sample Action", "Counter",
+                      menu_count, NULL);
 
-#define NUM_MENU_ITEMS 4
+#define NUM_MENU_ITEMS 3
 MenuItem *menuArray[NUM_MENU_ITEMS] = {
-  &menu1,
-  &menu2,
-  &menu3,
-  &menu4
+  &menu_xbee1,
+  &menu_xbee2,
+  &menu_example,
 };
 Menu menu(NUM_MENU_ITEMS, menuArray, &lcd);
 
 
-Button button1(2, NULL);
+
 //Button button2(3, button_set_xbee, (void *)'1'); // blue arcade switch
 //Button button3(4, button_set_xbee, (void *)'2'); // red arcade switch
-Button button2(3, button_light_led, (void *)LED); // blue arcade switch
-Button button3(4, button_light_led, (void *)LED);  // red arcade switch
+//Button button2(3, button_light_led, (void *)LED); // blue arcade switch
+//Button button3(4, button_light_led, (void *)LED);  // red arcade switch
 //Button button2(3, button_set_lcd, NULL); // blue arcade switch
 //Button button3(4, button_set_lcd, NULL);  // red arcade switch
-//Button button2(3, button_menu_next, &menu); // blue arcade switch
-//Button button3(4, button_menu_select, &menu);  // red arcade switch
+Button arcade_blue(2, false, button_menu_next, &menu); // blue arcade switch
+Button arcade_red(3, false, button_menu_select, &menu);  // red arcade switch
 
-#define NUM_PINS 14
+Button joystick_vert(5, true, joystick_menu_vert, &menu); // Joystick vertical
+Button joystick_horz(6, true, joystick_menu_horz, &menu); // Joystick vertical
+Button joystick_button(7, true, joystick_menu_select, &menu); // Joystick vertical
+
+#define NUM_PINS 21
 Pin *pinArray[NUM_PINS] = {
-  NULL,     // 0: RX - to Xbee via switch
-  NULL,     // 1: TX - to Xbee
-  &button1, // 2: on-board momentary
-  &button2, // 3: blue arcade button
-  &button3, // 4: red arcade button
-  NULL,     // 5: LCD
-  NULL,     // 6: LCD
-  NULL,     // 7: LCD
-  NULL,     // 8: LCD
-  NULL,     // 9: LCD
-  NULL,     // 10: LCD
-  NULL,     // 11: LED
-  NULL,     // 12: LED
-  NULL,     // 13: Empty
+  /* Digital Pins */
+  NULL,             // D0: RX - to Xbee via switch
+  NULL,             // D1: TX - to Xbee
+  &arcade_blue,     // D2: blue arcade button
+  &arcade_red,      // D3: red arcade button
+  NULL,             // D4: empty
+  NULL,             // D5: LCD
+  NULL,             // D6: LCD
+  NULL,             // D7: LCD
+  NULL,             // D8: LCD
+  NULL,             // D9: LCD
+  NULL,             // D10: LCD
+  NULL,             // D11: LED
+  NULL,             // D12: LED
+  NULL,             // D13: Empty
+
+  /* Analog Pins */
+  NULL,             // A1: Empty
+  NULL,             // A2: Empty
+  NULL,             // A3: Empty
+  NULL,             // A4: Empty
+  &joystick_vert,   // A5: Joystick
+  &joystick_horz,   // A6: Joystick
+  &joystick_button, // A7: Joystick
 };
-#endif
 
 void setup() {
   Serial.begin(9600);
@@ -65,9 +79,8 @@ void setup() {
   pinMode(debugLED, OUTPUT);
 
   
-//  LCD_setup();
-//  LCD_set(0, 0, "This is a test", true);
-//  menu.display();
+  LCD_setup();
+  menu.display();
 }
 
 #ifdef DEBUG
@@ -82,7 +95,7 @@ void loop() {
   }
 #endif
   
-  if (checkButtons(pinArray, NUM_PINS)) {
+  if (checkButtons(pinArray, NUM_PINS, false)) {
     DEBUG_COMMAND(digitalWrite(debugLED, HIGH));
   } else {
     DEBUG_COMMAND(digitalWrite(debugLED, LOW));

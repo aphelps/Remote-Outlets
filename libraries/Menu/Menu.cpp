@@ -29,6 +29,7 @@ MenuItem::MenuItem(String _menuText, String _selectedText,
   selectedText = _selectedText;
   action_ptr = _action_ptr;
   action_args = _action_args;
+  actionText = "";
 }
 
 int
@@ -81,7 +82,7 @@ void
 Menu::prev(void)
 {
   current--;
-  if (current < 0) current = numItems - 1;
+  if (current == (byte)(-1)) current = numItems - 1;
   display();
   DEBUG_PRINT(1, "prev now:0x");
   DEBUG_PRINT_HEX(1, current);
@@ -134,6 +135,7 @@ Menu::display(void)
 {
   if (selected) {
     LCD_set(0, 0, currentItem()->selectedText, true);
+    LCD_set(1, 0, currentItem()->actionText, true);
   } else {
     LCD_set(0, 0, currentItem()->menuText, true);
     LCD_set(1, 0, nextItem()->menuText, true);

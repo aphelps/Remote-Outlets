@@ -22,6 +22,7 @@ class MenuItem
 
   String menuText;
   String selectedText;
+  String actionText;
   
   private:
   boolean selected;
@@ -48,7 +49,7 @@ class Menu
 
   MenuItem **items;
   char numItems;
-  char current;
+  byte current;
   LiquidCrystal *lcd;
 };
 

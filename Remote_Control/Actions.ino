@@ -36,8 +36,9 @@ void button_set_xbee(int button, int value, void *arg)
 /* Scroll to the next menu item */
 void button_menu_next(int button, int value, void *arg)
 {
-  DEBUG_PRINT(1, "button_menu_next");
+  DEBUG_PRINT(3, "button_menu_next\n");
   if (value == HIGH) {
+    DEBUG_PRINT(1, "button_menu_next HIGH\n");
     Menu *menu = (Menu *)arg;
     if (menu->selected) {
       menu->enter();
@@ -50,8 +51,9 @@ void button_menu_next(int button, int value, void *arg)
 /* Scroll to the previous menu item */
 void button_menu_prev(int button, int value, void *arg)
 {
-  DEBUG_PRINT(1, "button_menu_prev");
+  DEBUG_PRINT(3, "button_menu_prev\n");
   if (value == HIGH) {
+    DEBUG_PRINT(1, "button_menu_prev HIGH\n");
     Menu *menu = (Menu *)arg;
     if (menu->selected) {
       menu->enter();
@@ -67,8 +69,9 @@ void button_menu_prev(int button, int value, void *arg)
  */
 void button_menu_select(int button, int value, void *arg)
 {
-  DEBUG_PRINT(1, "button_menu_select");
+  DEBUG_PRINT(3, "button_menu_select\n");
   if (value == HIGH) {
+    DEBUG_PRINT(1, "button_menu_select HIGH\n");
     Menu *menu = (Menu *)arg;
     if (menu->selected)
       menu->action();
@@ -76,6 +79,121 @@ void button_menu_select(int button, int value, void *arg)
       menu->enter();
   }
 }
+
+#define JOYSTICK_DELAY_MS   500
+
+#define JOYSTICK_VERT_DOWN  300
+#define JOYSTICK_VERT_UP    500
+void joystick_menu_vert(int button, int value, void *arg)
+{
+  Menu *menu = (Menu *)arg;
+
+  DEBUG_PRINT(3, "joystick_menu_vert ");
+  DEBUG_PRINT(3, value);
+  DEBUG_PRINT(3, "\n");
+
+  static unsigned int last_action_ms = 0;
+  if (last_action_ms &&
+      (last_action_ms + JOYSTICK_DELAY_MS > millis()))
+  {
+    return;
+  }
+
+  if (value < JOYSTICK_VERT_DOWN) {
+    DEBUG_PRINT(1, "joystick_menu_vert down\n");
+    if (menu->selected) {
+      
+    } else {
+      /* Next menu item */
+      menu->next();
+      last_action_ms = millis();
+    }
+    
+  } else if (value > JOYSTICK_VERT_UP) {
+    DEBUG_PRINT(1, "joystick_menu_vert up\n");
+    if (menu->selected) {
+      
+    } else {
+      /* Previous menu item */
+      menu->prev();
+      last_action_ms = millis();
+    }
+  }
+}
+
+#define JOYSTICK_HORZ_RIGHT   300
+#define JOYSTICK_HORZ_LEFT    500
+void joystick_menu_horz(int button, int value, void *arg)
+{
+  Menu *menu = (Menu *)arg;
+
+  DEBUG_PRINT(3, "joystick_menu_horz ");
+  DEBUG_PRINT(3, value);
+  DEBUG_PRINT(3, "\n");
+
+  static unsigned int last_action_ms = 0;
+  if (last_action_ms &&
+      (last_action_ms + JOYSTICK_DELAY_MS > millis()))
+  {
+    return;
+  }
+
+  if (value < JOYSTICK_HORZ_RIGHT) {
+    DEBUG_PRINT(1, "joystick_menu_horz right\n");
+    if (menu->selected) {
+
+    } else {
+
+    }
+  } else if (value > JOYSTICK_HORZ_LEFT) {
+    DEBUG_PRINT(1, "joystick_menu_horz left\n");
+    if (menu->selected) {
+      /* Exit the sub-menu */
+      menu->enter();
+      last_action_ms = millis();
+    } else {
+    }
+  }
+
+}
+
+#define JOYSTICK_SELECT_DOWN  50
+#define JOYSTICK_SELECT_UP    50
+void joystick_menu_select(int button, int value, void *arg)
+{
+  Menu *menu = (Menu *)arg;
+
+  DEBUG_PRINT(3, "joystick_menu_select ");
+  DEBUG_PRINT(3, value);
+  DEBUG_PRINT(3, "\n");
+
+  static unsigned int last_action_ms = 0;
+  if (last_action_ms &&
+      (last_action_ms + JOYSTICK_DELAY_MS > millis()))
+  {
+    return;
+  }
+
+  if (value < JOYSTICK_SELECT_DOWN) {
+    DEBUG_PRINT(1, "joystick_menu_select down\n");
+    Menu *menu = (Menu *)arg;
+    if (menu->selected) {
+      menu->action();
+      last_action_ms = millis();
+    } else {
+      menu->enter();
+      last_action_ms = millis();
+    }
+  } else if (value > JOYSTICK_SELECT_UP) {
+    
+  }
+}
+
+
+
+/******************************************************************************
+ * Menus Actions
+ *****************************************************************************/
 
 /* MenuItem test action */
 int menu_test(MenuItem *item, void *arg) 
@@ -90,7 +208,7 @@ int menu_count(MenuItem *item, void *arg)
   static int count = 0;
   //Menu *menu = (Menu *)arg;
   count++;
-  item->selectedText = String("Value: " + count);
+  item->actionText = String("Value: " + String(count));
   menu.display();
   return 0;
 }

@@ -6,13 +6,14 @@
 #include "Buttons.h"
 #include "Debug.h"
 
-Pin::Pin(byte _pin, pin_type_t _type)
+Pin::Pin(byte _pin, boolean _analog, pin_type_t _type)
 {
   pin = _pin;
   type = _type;
+  analog = _analog;
 }
 
-Pin::Pin(byte _pin)
+Pin::Pin(byte _pin, boolean _analog)
 {
   Pin(_pin, PIN_TYPE_NONE);
 }
@@ -31,38 +32,56 @@ Button::init(byte _pin, button_action_t _action)
 }
 
 
-Button::Button(byte _pin, button_action_t _action) 
-    : Pin(_pin, PIN_TYPE_BUTTON)
+Button::Button(byte _pin, boolean _analog, button_action_t _action) 
+    : Pin(_pin, _analog, PIN_TYPE_BUTTON)
 {
   init(_pin, _action);
   action_arg = NULL;
 
 }
 
-Button::Button(byte _pin, button_action_t _action, void *_action_arg)
-    : Pin(_pin, PIN_TYPE_BUTTON)
+Button::Button(byte _pin, boolean _analog, button_action_t _action, void *_action_arg)
+    : Pin(_pin, _analog, PIN_TYPE_BUTTON)
 {
   init(_pin, _action);
   action_arg = _action_arg;
 }
 
 
-boolean
+int
 Button::read(void) 
 {
-  curr_state = digitalRead(pin);
-  return (curr_state == HIGH);
+  if (analog) {
+    curr_state = analogRead(pin);
+  } else {
+    curr_state = digitalRead(pin);
+  }
+
+  DEBUG_PRINT(2, "read- pin ");
+  DEBUG_PRINT(2, pin);
+  DEBUG_PRINT(2, ": value=");
+  DEBUG_PRINT(2, curr_state);
+  DEBUG_PRINT(2, "\n");
+
+  if (action) action(pin, curr_state, action_arg);
+
+  return (curr_state);
 }
 
 
-boolean
+int
 Button::debouncedRead(void)
 {
-  byte currentValue = digitalRead(pin);
+  byte currentValue;
+  if (analog) {
+    currentValue = analogRead(pin);
+  } else {
+    currentValue = digitalRead(pin);
+  }
   
   if (currentValue != prev_state) {
     debounce_time = millis();
-    DEBUG_PRINT(2, "Button ");
+    DEBUG_PRINT(2, "debounce- pin ");
     DEBUG_PRINT(2, pin);
     DEBUG_PRINT(2, ": buttons_debounce_time=");
     DEBUG_PRINT(2, debounce_time);
@@ -73,7 +92,7 @@ Button::debouncedRead(void)
   if (currentValue != curr_state) {
     if ((millis() - debounce_time) > debounce_delay) {
       curr_state = currentValue;
-      DEBUG_PRINT(2, "Button ");
+      DEBUG_PRINT(2, "debounce- pin ");
       DEBUG_PRINT(2, pin);
       DEBUG_PRINT(2, ": value=");
       DEBUG_PRINT(2, curr_state);
@@ -88,13 +107,21 @@ Button::debouncedRead(void)
 
 /* Check the state of every sensor */
 boolean
-checkButtons(Pin **pins, byte num_pins) {
+checkButtons(Pin **pins, byte num_pins, boolean debounce) {
   boolean retval = false;
   for (byte i = 0; i < num_pins; i++) {
     Pin *pin = pins[i];
-    if (pin->type == PIN_TYPE_BUTTON)
-      if (((Button *)pin)->debouncedRead())
-        retval = true;
+    if (pin->type == PIN_TYPE_BUTTON) {
+      if (debounce && !(pin->analog)) {
+        if (((Button *)pin)->debouncedRead()) {
+          retval = true;
+        }
+      } else {
+        if (((Button *)pin)->read()) {
+          ;
+        }
+      }
+    }
   }
   return retval;
 }

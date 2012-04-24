@@ -21,10 +21,11 @@ typedef enum
 class Pin 
 {
   public:
-  Pin(byte _pin, pin_type_t _type);
-  Pin(byte _pin);
+  Pin(byte _pin, boolean _analog, pin_type_t _type);
+  Pin(byte _pin, boolean _analog);
 
   pin_type_t type;
+  boolean analog;
 
   protected:
   byte pin;
@@ -35,10 +36,11 @@ typedef void (*button_action_t)(int button, int value, void *arg);
 class Button : public Pin
 {
   public:
-  Button(byte _pin, button_action_t _action);
-  Button(byte _pin, button_action_t _action, void *_action_arg);
-  boolean read(void);
-  boolean debouncedRead(void);
+  Button(byte _pin, boolean _analog, button_action_t _action);
+  Button(byte _pin, boolean _analog,
+         button_action_t _action, void *_action_arg);
+  int read(void);
+  int debouncedRead(void);
 
   button_action_t action;
   void *action_arg;
@@ -46,14 +48,14 @@ class Button : public Pin
   private:
   void init(byte _pin, button_action_t _action);
 
-  byte curr_state;
-  byte prev_state;
+  unsigned int curr_state;
+  unsigned int prev_state;
 
   unsigned long debounce_time;
   unsigned long debounce_delay;
 };
 
 
-boolean checkButtons(Pin **pins, byte num_pins);
+boolean checkButtons(Pin **pins, byte num_pins, boolean debounce);
 
 #endif
