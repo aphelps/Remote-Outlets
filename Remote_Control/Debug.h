@@ -1,4 +1,5 @@
-#define DEBUG
+/* Set to enable debugging macros */
+//#define DEBUG
 #ifdef DEBUG
   #define DEBUG_VERBOSE 1
   #define DEBUG_PRINT(v, x) if (v <= DEBUG_VERBOSE) Serial.print(x)
