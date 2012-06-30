@@ -13,7 +13,7 @@
 #define GREEN 1
 #define BLUE  2
 
-int LEDChannels[NumLEDs][3] = {0};
+int LEDChannels[NumLEDs][3] = { 0 };
 int SB_CommandMode;
 int SB_RedCommand;
 int SB_GreenCommand;
@@ -83,12 +83,13 @@ void WriteLEDArray() {
 
 
 #define VALUE_MAX 1023
-#define VALUE_INC 10
+#define VALUE_INC 1
 
-#define DELAY 5
+#define DELAY 10
 
-/* Threshold value for the photoresistor */
-#define THRESHOLD 650
+/* Threshold value for the photoresphotoresistoristor */
+#define THRESHOLD_HIGH 670
+#define THRESHOLD_LOW  570
 
 void LED_set_mode1(int cycle, int value) {
   switch (cycle % MODES) {
@@ -155,6 +156,7 @@ void loop() {
   static int cycle;
   static int value;
   static int direction = 1;
+  static boolean lights_on = false;
 
   LEDChannels[0][0] = 0;
   LEDChannels[0][1] = 0;
@@ -162,6 +164,11 @@ void loop() {
   
 //  int lightvalue = THRESHOLD + 1;
   int lightvalue = analogRead(PIN_PHOTORESISTOR);
+  if (lightvalue > THRESHOLD_HIGH) {
+    lights_on = true;
+  } else if (lightvalue < THRESHOLD_LOW) {
+    lights_on = false;
+  }
   
 #ifdef DIAL
   int dialvalue = analogRead(PIN_DIAL);
@@ -183,12 +190,12 @@ void loop() {
   Serial.print(cycle);
   Serial.print("\n"); 
   
-  if (lightvalue > THRESHOLD) {    
+  if (lights_on) {    
     if (direction)  {
       value = (value + VALUE_INC);
       if (value > VALUE_MAX) {
         value = VALUE_MAX;  
-        cycle++;
+        //cycle++;
         direction = 0;
       }
     } else {
