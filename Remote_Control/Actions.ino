@@ -1,44 +1,38 @@
-void button_set_lcd(int button, int value, void *arg)
+void switch_light_led(int pin, int value, void *arg)
 {
-  String text = String(String("button ") + String(button) + String(":") + String(value));
-  LCD_set(button - 1, 0, text, true);
-}
-
-void button_light_led(int button, int value, void *arg)
-{
-  int pin = (int)arg;
+  int led_pin = (int)arg;
 #ifdef DEBUG
-  if ((pin < 0) || (pin > 14))
+  if ((led_pin < 0) || (led_pin > 14))
     return;
 #endif
 
-  DEBUG_PRINT(2, "button_light_led\n");
-  digitalWrite(pin, value);
+  DEBUG_PRINT(2, "switch_light_led\n");
+  digitalWrite(led_pin, value);
 }
 
-void button_set_xbee(int button, int value, void *arg)
+void switch_set_xbee(int pin, int value, void *arg)
 {
-  char pin = (int)arg & 0xFF;
+  char led_pin = (int)arg & 0xFF;
 #ifdef DEBUG
-  if ((pin < '0') || (pin > '7'))
+  if ((led_pin < '0') || (led_pin > '7'))
     return;
 #endif
 
-  DEBUG_PRINT(2, "button_set_xbee\n");
+  DEBUG_PRINT(2, "switch_set_xbee\n");
 
   if (value == HIGH) {
-    setRemoteState(pin, 0x5);
+    setRemoteState(led_pin, 0x5);
   } else {
-    setRemoteState(pin, 0x4);
+    setRemoteState(led_pin, 0x4);
   } 
 }
 
 /* Scroll to the next menu item */
-void button_menu_next(int button, int value, void *arg)
+void switch_menu_next(int pin, int value, void *arg)
 {
-  DEBUG_PRINT(3, "button_menu_next\n");
+  DEBUG_PRINT(3, "switch_menu_next\n");
   if (value == HIGH) {
-    DEBUG_PRINT(1, "button_menu_next HIGH\n");
+    DEBUG_PRINT(1, "switch_menu_next HIGH\n");
     Menu *menu = (Menu *)arg;
     if (menu->selected) {
       menu->enter();
@@ -49,11 +43,11 @@ void button_menu_next(int button, int value, void *arg)
 }
 
 /* Scroll to the previous menu item */
-void button_menu_prev(int button, int value, void *arg)
+void switch_menu_prev(int pin, int value, void *arg)
 {
-  DEBUG_PRINT(3, "button_menu_prev\n");
+  DEBUG_PRINT(3, "switch_menu_prev\n");
   if (value == HIGH) {
-    DEBUG_PRINT(1, "button_menu_prev HIGH\n");
+    DEBUG_PRINT(1, "switch_menu_prev HIGH\n");
     Menu *menu = (Menu *)arg;
     if (menu->selected) {
       menu->enter();
@@ -67,11 +61,11 @@ void button_menu_prev(int button, int value, void *arg)
  * MenuItem action which will select the current item and invoke the action
  * of the currently selected item.
  */
-void button_menu_select(int button, int value, void *arg)
+void switch_menu_select(int pin, int value, void *arg)
 {
-  DEBUG_PRINT(3, "button_menu_select\n");
+  DEBUG_PRINT(3, "switch_menu_select\n");
   if (value == HIGH) {
-    DEBUG_PRINT(1, "button_menu_select HIGH\n");
+    DEBUG_PRINT(1, "switch_menu_select HIGH\n");
     Menu *menu = (Menu *)arg;
     if (menu->selected)
       menu->action();
@@ -84,7 +78,7 @@ void button_menu_select(int button, int value, void *arg)
 
 #define JOYSTICK_VERT_DOWN  300
 #define JOYSTICK_VERT_UP    500
-void joystick_menu_vert(int button, int value, void *arg)
+void joystick_menu_vert(int pin, int value, void *arg)
 {
   Menu *menu = (Menu *)arg;
 
@@ -123,7 +117,7 @@ void joystick_menu_vert(int button, int value, void *arg)
 
 #define JOYSTICK_HORZ_RIGHT   300
 #define JOYSTICK_HORZ_LEFT    500
-void joystick_menu_horz(int button, int value, void *arg)
+void joystick_menu_horz(int pin, int value, void *arg)
 {
   Menu *menu = (Menu *)arg;
 
@@ -159,7 +153,7 @@ void joystick_menu_horz(int button, int value, void *arg)
 
 #define JOYSTICK_SELECT_DOWN  50
 #define JOYSTICK_SELECT_UP    50
-void joystick_menu_select(int button, int value, void *arg)
+void joystick_menu_select(int pin, int value, void *arg)
 {
   Menu *menu = (Menu *)arg;
 
@@ -200,7 +194,7 @@ int menu_test(MenuItem *item, void *arg)
 {
   DEBUG_PRINT(1, "menu_test\n");
   LCD_set(1, 0, "Action test", true);
-  return 1;
+  return 1;  
 }
 
 int menu_count(MenuItem *item, void *arg) 
@@ -220,20 +214,20 @@ int menu_count(MenuItem *item, void *arg)
 int menu_toggle_xbee(MenuItem *item, void *arg)
 {
   static int value = HIGH;
-  char pin = (int)arg & 0xFF;
+  char remote_pin = (int)arg & 0xFF;
 #ifdef DEBUG
-  if ((pin < '0') || (pin > '7'))
+  if ((remote_pin < '0') || (remote_pin > '7'))
     return 0;
 #endif
 
-  DEBUG_PRINT(2, "button_set_xbee\n");
+  DEBUG_PRINT(2, "switch_set_xbee\n");
 
   if (value == HIGH) {
-    setRemoteState(pin, 0x5);
+    setRemoteState(remote_pin, 0x5);
     value = LOW;
     return HIGH;
   } else {
-    setRemoteState(pin, 0x4);
+    setRemoteState(remote_pin, 0x4);
     value = HIGH;
     return LOW;
   }

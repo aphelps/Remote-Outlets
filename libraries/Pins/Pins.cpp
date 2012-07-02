@@ -3,7 +3,7 @@
  */
 #include <Arduino.h>
 
-#include "Buttons.h"
+#include "Pins.h"
 #include "Debug.h"
 
 Pin::Pin(byte _pin, boolean _analog, pin_type_t _type)
@@ -11,6 +11,9 @@ Pin::Pin(byte _pin, boolean _analog, pin_type_t _type)
   pin = _pin;
   type = _type;
   analog = _analog;
+  if (!analog) {
+    digitalWrite(pin, LOW);
+  }
 }
 
 Pin::Pin(byte _pin, boolean _analog)
@@ -19,7 +22,7 @@ Pin::Pin(byte _pin, boolean _analog)
 }
 
 void
-Button::init(byte _pin, button_action_t _action)
+Switch::init(byte _pin, pin_action_t _action)
 {
   pinMode(pin, OUTPUT);
   action = _action;
@@ -32,16 +35,16 @@ Button::init(byte _pin, button_action_t _action)
 }
 
 
-Button::Button(byte _pin, boolean _analog, button_action_t _action) 
-    : Pin(_pin, _analog, PIN_TYPE_BUTTON)
+Switch::Switch(byte _pin, boolean _analog, pin_action_t _action) 
+    : Pin(_pin, _analog, PIN_TYPE_SWITCH)
 {
   init(_pin, _action);
   action_arg = NULL;
 
 }
-
-Button::Button(byte _pin, boolean _analog, button_action_t _action, void *_action_arg)
-    : Pin(_pin, _analog, PIN_TYPE_BUTTON)
+ 
+Switch::Switch(byte _pin, boolean _analog, pin_action_t _action, void *_action_arg)
+    : Pin(_pin, _analog, PIN_TYPE_SWITCH)
 {
   init(_pin, _action);
   action_arg = _action_arg;
@@ -49,7 +52,7 @@ Button::Button(byte _pin, boolean _analog, button_action_t _action, void *_actio
 
 
 int
-Button::read(void) 
+Switch::read(void) 
 {
   if (analog) {
     curr_state = analogRead(pin);
@@ -70,7 +73,7 @@ Button::read(void)
 
 
 int
-Button::debouncedRead(void)
+Switch::debouncedRead(void)
 {
   byte currentValue;
   if (analog) {
@@ -97,27 +100,27 @@ Button::debouncedRead(void)
       DEBUG_PRINT(2, ": value=");
       DEBUG_PRINT(2, curr_state);
       DEBUG_PRINT(2, "\n");
-
-      if (action) action(pin, currentValue, action_arg);
     }
   }
-  
+
+  if (action) action(pin, currentValue, action_arg);
+      
   return (curr_state == HIGH);
 }
 
 /* Check the state of every sensor */
 boolean
-checkButtons(Pin **pins, byte num_pins, boolean debounce) {
+checkSwitches(Pin **pins, byte num_pins, boolean debounce) {
   boolean retval = false;
   for (byte i = 0; i < num_pins; i++) {
     Pin *pin = pins[i];
-    if (pin->type == PIN_TYPE_BUTTON) {
+    if (pin->type == PIN_TYPE_SWITCH) {
       if (debounce && !(pin->analog)) {
-        if (((Button *)pin)->debouncedRead()) {
+        if (((Switch *)pin)->debouncedRead()) {
           retval = true;
         }
       } else {
-        if (((Button *)pin)->read()) {
+        if (((Switch *)pin)->read()) {
           ;
         }
       }
