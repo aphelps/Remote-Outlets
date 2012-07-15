@@ -24,7 +24,7 @@ Pin::Pin(byte _pin, boolean _analog)
 void
 Switch::init(byte _pin, pin_action_t _action)
 {
-  pinMode(pin, OUTPUT);
+  pinMode(pin, INPUT);
   action = _action;
 
   /* Init to defaults */
