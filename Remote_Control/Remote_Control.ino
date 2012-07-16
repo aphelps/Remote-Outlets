@@ -6,6 +6,9 @@
 
 #include <LiquidCrystal.h>
 
+//#define DEBUG
+//#define DEBUG_VERBOSE 2
+
 #include "Pins.h"
 #include "Debug.h"
 #include "LCD.h"
