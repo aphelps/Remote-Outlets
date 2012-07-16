@@ -34,26 +34,26 @@ Menu menu(NUM_MENU_ITEMS, menuArray, &lcd);
 
 
 
-//Switch switch2(3, switch_set_xbee, (void *)'1'); // blue arcade switch
-//Switch switch3(4, switch_set_xbee, (void *)'2'); // red arcade switch
-//Switch switch2(3, switch_light_led, (void *)LED); // blue arcade switch
-//Switch switch3(4, switch_light_led, (void *)LED);  // red arcade switch
-//Switch switch2(3, switch_set_lcd, NULL); // blue arcade switch
-//Switch switch3(4, switch_set_lcd, NULL);  // red arcade switch
-Switch arcade_blue(2, false, switch_menu_next, &menu); // blue arcade switch
-Switch arcade_red(3, false, switch_menu_select, &menu);  // red arcade switch
+//Sensor sensor2(3, sensor_set_xbee, (void *)'1'); // blue arcade sensor
+//Sensor sensor3(4, sensor_set_xbee, (void *)'2'); // red arcade sensor
+//Sensor sensor2(3, sensor_light_led, (void *)LED); // blue arcade sensor
+//Sensor sensor3(4, sensor_light_led, (void *)LED);  // red arcade sensor
+//Sensor sensor2(3, sensor_set_lcd, NULL); // blue arcade sensor
+//Sensor sensor3(4, sensor_set_lcd, NULL);  // red arcade sensor
+Sensor arcade_blue(2, false, sensor_menu_next, &menu); // blue arcade sensor
+Sensor arcade_red(3, false, sensor_menu_select, &menu);  // red arcade sensor
 
-Switch joystick_vert(5, true, joystick_menu_vert, &menu); // Joystick vertical
-Switch joystick_horz(6, true, joystick_menu_horz, &menu); // Joystick vertical
-Switch joystick_switch(7, true, joystick_menu_select, &menu); // Joystick vertical
+Sensor joystick_vert(5, true, joystick_menu_vert, &menu); // Joystick vertical
+Sensor joystick_horz(6, true, joystick_menu_horz, &menu); // Joystick vertical
+Sensor joystick_sensor(7, true, joystick_menu_select, &menu); // Joystick vertical
 
 #define NUM_PINS 21
 Pin *pinArray[NUM_PINS] = {
   /* Digital Pins */
-  NULL,             // D0: RX - to Xbee via switch
+  NULL,             // D0: RX - to Xbee via sensor
   NULL,             // D1: TX - to Xbee
-  &arcade_blue,     // D2: blue arcade switch
-  &arcade_red,      // D3: red arcade switch
+  &arcade_blue,     // D2: blue arcade sensor
+  &arcade_red,      // D3: red arcade sensor
   NULL,             // D4: empty
   NULL,             // D5: LCD
   NULL,             // D6: LCD
@@ -72,7 +72,7 @@ Pin *pinArray[NUM_PINS] = {
   NULL,             // A4: Empty
   &joystick_vert,   // A5: Joystick
   &joystick_horz,   // A6: Joystick
-  &joystick_switch, // A7: Joystick
+  &joystick_sensor, // A7: Joystick
 };
 
 void setup() {
@@ -98,7 +98,7 @@ void loop() {
   }
 #endif
   
-  if (checkSwitches(pinArray, NUM_PINS, false)) {
+  if (checkSensors(pinArray, NUM_PINS, false)) {
     DEBUG_COMMAND(digitalWrite(debugLED, HIGH));
   } else {
     DEBUG_COMMAND(digitalWrite(debugLED, LOW));

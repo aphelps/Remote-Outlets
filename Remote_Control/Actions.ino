@@ -1,4 +1,4 @@
-void switch_light_led(int pin, int value, void *arg)
+void sensor_light_led(int pin, int value, void *arg)
 {
   int led_pin = (int)arg;
 #ifdef DEBUG
@@ -6,11 +6,11 @@ void switch_light_led(int pin, int value, void *arg)
     return;
 #endif
 
-  DEBUG_PRINT(2, "switch_light_led\n");
+  DEBUG_PRINT(2, "sensor_light_led\n");
   digitalWrite(led_pin, value);
 }
 
-void switch_set_xbee(int pin, int value, void *arg)
+void sensor_set_xbee(int pin, int value, void *arg)
 {
   char led_pin = (int)arg & 0xFF;
 #ifdef DEBUG
@@ -18,7 +18,7 @@ void switch_set_xbee(int pin, int value, void *arg)
     return;
 #endif
 
-  DEBUG_PRINT(2, "switch_set_xbee\n");
+  DEBUG_PRINT(2, "sensor_set_xbee\n");
 
   if (value == HIGH) {
     setRemoteState(led_pin, 0x5);
@@ -28,11 +28,11 @@ void switch_set_xbee(int pin, int value, void *arg)
 }
 
 /* Scroll to the next menu item */
-void switch_menu_next(int pin, int value, void *arg)
+void sensor_menu_next(int pin, int value, void *arg)
 {
-  DEBUG_PRINT(3, "switch_menu_next\n");
+  DEBUG_PRINT(3, "sensor_menu_next\n");
   if (value == HIGH) {
-    DEBUG_PRINT(1, "switch_menu_next HIGH\n");
+    DEBUG_PRINT(1, "sensor_menu_next HIGH\n");
     Menu *menu = (Menu *)arg;
     if (menu->selected) {
       menu->enter();
@@ -43,11 +43,11 @@ void switch_menu_next(int pin, int value, void *arg)
 }
 
 /* Scroll to the previous menu item */
-void switch_menu_prev(int pin, int value, void *arg)
+void sensor_menu_prev(int pin, int value, void *arg)
 {
-  DEBUG_PRINT(3, "switch_menu_prev\n");
+  DEBUG_PRINT(3, "sensor_menu_prev\n");
   if (value == HIGH) {
-    DEBUG_PRINT(1, "switch_menu_prev HIGH\n");
+    DEBUG_PRINT(1, "sensor_menu_prev HIGH\n");
     Menu *menu = (Menu *)arg;
     if (menu->selected) {
       menu->enter();
@@ -61,11 +61,11 @@ void switch_menu_prev(int pin, int value, void *arg)
  * MenuItem action which will select the current item and invoke the action
  * of the currently selected item.
  */
-void switch_menu_select(int pin, int value, void *arg)
+void sensor_menu_select(int pin, int value, void *arg)
 {
-  DEBUG_PRINT(3, "switch_menu_select\n");
+  DEBUG_PRINT(3, "sensor_menu_select\n");
   if (value == HIGH) {
-    DEBUG_PRINT(1, "switch_menu_select HIGH\n");
+    DEBUG_PRINT(1, "sensor_menu_select HIGH\n");
     Menu *menu = (Menu *)arg;
     if (menu->selected)
       menu->action();
@@ -220,7 +220,7 @@ int menu_toggle_xbee(MenuItem *item, void *arg)
     return 0;
 #endif
 
-  DEBUG_PRINT(2, "switch_set_xbee\n");
+  DEBUG_PRINT(2, "sensor_set_xbee\n");
 
   if (value == HIGH) {
     setRemoteState(remote_pin, 0x5);
