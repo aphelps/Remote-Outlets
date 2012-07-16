@@ -60,7 +60,7 @@ boolean checkSwitches(Pin **pins, byte num_pins, boolean debounce);
 #define IGNITION_TIMEOUT_MS 5000
 #define SOLENOID_TIMEOUT_MS 500
 
-class Poofer 
+class Poofer
 {
   public:
   int sol_switch;
@@ -71,10 +71,10 @@ class Poofer
   int ign_relay;
 
   int sol_value;
-  unsigned int sol_turned_on_ms;
+  unsigned long sol_turned_on_ms;
   
   int ign_value;
-  unsigned int ign_turned_on_ms;
+  unsigned long ign_turned_on_ms;
 
   public:
   Poofer(int _sol_switch,
