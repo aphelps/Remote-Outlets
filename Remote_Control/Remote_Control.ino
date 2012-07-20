@@ -40,12 +40,12 @@ Menu menu(NUM_MENU_ITEMS, menuArray, &lcd);
 //Sensor sensor3(4, sensor_light_led, (void *)LED);  // red arcade sensor
 //Sensor sensor2(3, sensor_set_lcd, NULL); // blue arcade sensor
 //Sensor sensor3(4, sensor_set_lcd, NULL);  // red arcade sensor
-Sensor arcade_blue(2, false, sensor_menu_next, &menu); // blue arcade sensor
-Sensor arcade_red(3, false, sensor_menu_select, &menu);  // red arcade sensor
+Sensor arcade_blue(2, false, false, sensor_menu_next, &menu); // blue arcade sensor
+Sensor arcade_red(3, false, false, sensor_menu_select, &menu);  // red arcade sensor
 
-Sensor joystick_vert(5, true, joystick_menu_vert, &menu); // Joystick vertical
-Sensor joystick_horz(6, true, joystick_menu_horz, &menu); // Joystick vertical
-Sensor joystick_sensor(7, true, joystick_menu_select, &menu); // Joystick vertical
+Sensor joystick_vert(5, false, true, joystick_menu_vert, &menu); // Joystick vertical
+Sensor joystick_horz(6, false, true, joystick_menu_horz, &menu); // Joystick vertical
+Sensor joystick_sensor(7, false, true, joystick_menu_select, &menu); // Joystick vertical
 
 #define NUM_PINS 21
 Pin *pinArray[NUM_PINS] = {
