@@ -1,93 +1,34 @@
-#define clockpin 13 // CI
-#define enablepin 10 // EI
-#define latchpin 9 // LI
-#define datapin 11 // DI
- 
+/*
+ * Code for little lights using ShiftBars
+ */
+
+#include <Arduino.h>
+#include "ShiftBar.h"
+
 // Analog Values
 #define PIN_PHOTORESISTOR 0
 #define PIN_DIAL          1
 
 #define NumLEDs 1
 
-#define RED   0
-#define GREEN 1
-#define BLUE  2
+uint16_t LEDChannels[NumLEDs][3];
 
-int LEDChannels[NumLEDs][3] = { 0 };
-int SB_CommandMode;
-int SB_RedCommand;
-int SB_GreenCommand;
-int SB_BlueCommand;
+ShiftBar SB(NumLEDs, (uint16_t *)LEDChannels);
  
-void setup() {  
+void setup() {
    Serial.begin(9600);
-   randomSeed(analogRead(0));
 
-   /* Setup the ShiftBrite pins */ 
-   pinMode(datapin, OUTPUT);
-   pinMode(latchpin, OUTPUT);
-   pinMode(enablepin, OUTPUT);
-   pinMode(clockpin, OUTPUT);
-   SPCR = (1<<SPE)|(1<<MSTR)|(0<<SPR1)|(0<<SPR0);
-   digitalWrite(latchpin, LOW);
-   digitalWrite(enablepin, LOW);
- 
- 
-}
- 
-void SB_SendPacket() {
- 
-    if (SB_CommandMode == B01) {
-     SB_RedCommand = 120;
-     SB_GreenCommand = 100;
-     SB_BlueCommand = 100;
-    }
- 
-    SPDR = SB_CommandMode << 6 | SB_BlueCommand >> 4;
-    while(!(SPSR & (1<<SPIF)));
-    SPDR = SB_BlueCommand << 4 | SB_RedCommand >> 6;
-    while(!(SPSR & (1<<SPIF)));
-    SPDR = SB_RedCommand << 2  | SB_GreenCommand>>8;
-    while(!(SPSR & (1<<SPIF)));
-    SPDR = SB_GreenCommand;
-    while(!(SPSR & (1<<SPIF)));
- 
-}
- 
-void WriteLEDArray() {
- 
-    SB_CommandMode = B00; // Write to PWM control registers
-    for (int h = 0; h<NumLEDs; h++) {
-	  SB_RedCommand   = LEDChannels[h][0];
-	  SB_GreenCommand = LEDChannels[h][1];
-	  SB_BlueCommand  = LEDChannels[h][2];
-	  SB_SendPacket();
-    }
- 
-    delayMicroseconds(15);
-    digitalWrite(latchpin,HIGH); // latch data into registers
-    delayMicroseconds(15);
-    digitalWrite(latchpin,LOW);
- 
-    SB_CommandMode = B01; // Write to current control registers
-    for (int z = 0; z < NumLEDs; z++) SB_SendPacket();
-    delayMicroseconds(15);
-    digitalWrite(latchpin,HIGH); // latch data into registers
-    delayMicroseconds(15);
-    digitalWrite(latchpin,LOW);
- 
+   /* Initialize the randomseed with the value of an unconnected analog pin */
+   randomSeed(analogRead(5));
 }
  
 #define MODES 7
 
-
-
-#define VALUE_MAX 1023
 #define VALUE_INC 1
 
 #define DELAY 10
 
-/* Threshold value for the photoresphotoresistoristor */
+/* Threshold value for the photoresistor */
 #define THRESHOLD_HIGH 670
 #define THRESHOLD_LOW  570
 
@@ -99,31 +40,31 @@ void LED_set_mode1(int cycle, int value) {
       LEDChannels[0][2] = value;      
       break;
     }
-    case 1: {  // RED
-      LEDChannels[0][RED] = value;
+    case 1: {  // Red
+      LEDChannels[0][SHIFTBAR_RED] = value;
       break;
     }
     case 2: { // Green
-      LEDChannels[0][GREEN] = value;
+      LEDChannels[0][SHIFTBAR_GREEN] = value;
       break;     
     }
     case 3: {  // Blue
-      LEDChannels[0][BLUE] = value;
+      LEDChannels[0][SHIFTBAR_BLUE] = value;
       break;
     }
     case 4: { // Red and Green
-      LEDChannels[0][RED] = value;
-      LEDChannels[0][GREEN] = value;
+      LEDChannels[0][SHIFTBAR_RED] = value;
+      LEDChannels[0][SHIFTBAR_GREEN] = value;
       break;
     }
     case 5: {
-      LEDChannels[0][GREEN] = value;
-      LEDChannels[0][BLUE] = value;      
+      LEDChannels[0][SHIFTBAR_GREEN] = value;
+      LEDChannels[0][SHIFTBAR_BLUE] = value;      
       break;
     }
     case 6: {
-      LEDChannels[0][RED] = value;
-      LEDChannels[0][BLUE] = value;      
+      LEDChannels[0][SHIFTBAR_RED] = value;
+      LEDChannels[0][SHIFTBAR_BLUE] = value;      
       break;
     }
   }  
@@ -136,7 +77,7 @@ void LED_set_random(int cycle, int value) {
   if (cycle != last_cycle) {
     double max = 0;
     for (int i = 0; i < 3; i++) {
-      color[i] = random(0, VALUE_MAX);
+      color[i] = random(0, SHIFTBAR_MAX);
       if (color[i] > max) max = color[i];
     }
     
@@ -193,8 +134,8 @@ void loop() {
   if (lights_on) {    
     if (direction)  {
       value = (value + VALUE_INC);
-      if (value > VALUE_MAX) {
-        value = VALUE_MAX;  
+      if (value > SHIFTBAR_MAX) {
+        value = SHIFTBAR_MAX;  
         //cycle++;
         direction = 0;
       }
@@ -216,7 +157,7 @@ void loop() {
   }
   
   // Send values to LEDs
-  WriteLEDArray();
+  SB.update();
   
   delay(DELAY);
 }
