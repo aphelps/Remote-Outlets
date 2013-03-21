@@ -3,23 +3,36 @@
  */
 
 #include <Arduino.h>
+
+//#define DEBUG
+//#define DEBUG_VERBOSE 2
+
+#include "Debug.h"
+#include "LightModuleModes.h"
 #include "ShiftBar.h"
 
 // Analog Values
 #define PIN_PHOTORESISTOR 0
-#define PIN_DIAL          1
 
-#define NumLEDs 1
+uint16_t values[1][3];
 
-uint16_t LEDChannels[NumLEDs][3];
+#define UNLIT_DELAY 5000 // Period to wait when checking photoresister
 
-ShiftBar SB(NumLEDs, (uint16_t *)LEDChannels);
- 
+ShiftBar SB(1, (uint16_t *)values);
+
+light_pair_t modeFunctions[] = {
+  { light_mode_random, (void *)1000 },  // LIGHT_MODE_RANDOM
+  { light_mode_random_fade, (void *)10 },  // LIGHT_MODE_RANDOM
+};
+
 void setup() {
    Serial.begin(9600);
 
    /* Initialize the randomseed with the value of an unconnected analog pin */
    randomSeed(analogRead(5));
+
+   /* Initialize the light mode module */
+   light_mode_init(&SB);
 }
  
 #define MODES 7
@@ -29,81 +42,14 @@ void setup() {
 #define DELAY 10
 
 /* Threshold value for the photoresistor */
-#define THRESHOLD_HIGH 670
-#define THRESHOLD_LOW  570
-
-void LED_set_mode1(int cycle, int value) {
-  switch (cycle % MODES) {
-    case 0: { // All on
-      LEDChannels[0][0] = value;
-      LEDChannels[0][1] = value;
-      LEDChannels[0][2] = value;      
-      break;
-    }
-    case 1: {  // Red
-      LEDChannels[0][SHIFTBAR_RED] = value;
-      break;
-    }
-    case 2: { // Green
-      LEDChannels[0][SHIFTBAR_GREEN] = value;
-      break;     
-    }
-    case 3: {  // Blue
-      LEDChannels[0][SHIFTBAR_BLUE] = value;
-      break;
-    }
-    case 4: { // Red and Green
-      LEDChannels[0][SHIFTBAR_RED] = value;
-      LEDChannels[0][SHIFTBAR_GREEN] = value;
-      break;
-    }
-    case 5: {
-      LEDChannels[0][SHIFTBAR_GREEN] = value;
-      LEDChannels[0][SHIFTBAR_BLUE] = value;      
-      break;
-    }
-    case 6: {
-      LEDChannels[0][SHIFTBAR_RED] = value;
-      LEDChannels[0][SHIFTBAR_BLUE] = value;      
-      break;
-    }
-  }  
-}
-
-void LED_set_random(int cycle, int value) {
-  static int last_cycle = -1;
-  static double color[3];
-
-  if (cycle != last_cycle) {
-    double max = 0;
-    for (int i = 0; i < 3; i++) {
-      color[i] = random(0, SHIFTBAR_MAX);
-      if (color[i] > max) max = color[i];
-    }
-    
-    for (int i = 0; i < 3; i++) {
-      color[i] = color[i] / max; 
-    }
-    
-    last_cycle = cycle;
-  }
-  
-  for (int i = 0; i < 3; i++) {
-    LEDChannels[0][i] = value * color[i];
-  }      
-}
+#define THRESHOLD_HIGH 650
+#define THRESHOLD_LOW  500
 
 void loop() {
-  static int cycle;
-  static int value;
-  static int direction = 1;
   static boolean lights_on = false;
+  unsigned long delay_period;
 
-  LEDChannels[0][0] = 0;
-  LEDChannels[0][1] = 0;
-  LEDChannels[0][2] = 0;
-  
-//  int lightvalue = THRESHOLD + 1;
+  /* Determine if the lights should be on */
   int lightvalue = analogRead(PIN_PHOTORESISTOR);
   if (lightvalue > THRESHOLD_HIGH) {
     lights_on = true;
@@ -111,54 +57,23 @@ void loop() {
     lights_on = false;
   }
   
-#ifdef DIAL
-  int dialvalue = analogRead(PIN_DIAL);
-  mode = map(dialvalue, 250, 870, 0, MODES);
-  if (mode == MODES) {
-    mode = cycle % MODES;
-  }
-#endif   
+  DEBUG_VALUE(2, "light:", lightvalue);
+  DEBUG_VALUE(2, " on:", lights_on);
 
-  Serial.print("light ");
-  Serial.print(lightvalue);
-#ifdef DIAL
-  Serial.print("dial ");
-  Serial.print(dialvalue);
-#endif
-  Serial.print(" value ");
-  Serial.print(value);
-  Serial.print(" cycle ");
-  Serial.print(cycle);
-  Serial.print("\n"); 
-  
-  if (lights_on) {    
-    if (direction)  {
-      value = (value + VALUE_INC);
-      if (value > SHIFTBAR_MAX) {
-        value = SHIFTBAR_MAX;  
-        //cycle++;
-        direction = 0;
-      }
-    } else {
-      value = (value - VALUE_INC);
-      if (value <= 0) {
-        value = 0;
-        cycle++;
-        direction = 1;       
-      }
-    }
-    
-    //  LED_set_mode1(cycle, value);
-    LED_set_random(cycle, value);
+  if (lights_on) {
+    /* Call the function to set the lights */
+    int mode = get_current_mode();
+    DEBUG_VALUE(2, " mode:", mode);
+
+    delay_period = modeFunctions[mode].function(modeFunctions[mode].arg);
   } else {
-    LEDChannels[0][0] = 0;
-    LEDChannels[0][1] = 0;
-    LEDChannels[0][2] = 0;
+    SB.set(0, 0, 0);
+    delay_period = UNLIT_DELAY;
   }
-  
-  // Send values to LEDs
   SB.update();
-  
-  delay(DELAY);
-}
 
+  DEBUG_VALUELN(2, " delay:", delay_period);
+
+  /* Wait for the specified interval */
+  delay(delay_period);
+}
